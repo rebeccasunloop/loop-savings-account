@@ -35,6 +35,8 @@ Everything visual is pulled from `next-app`, not approximated:
   `shadow-lg`, `ring-secondary`, `text-sm font-semibold` items), `ui/table.tsx`
   (`rounded-2xl`, `border-secondary`, `shadow-xs`), `TimeRangeSelector`, `DeltaBadge`,
   `AccountBalanceChart` (dashed `3 4` grid, `utility-brand-600` line, 0.18→0 gradient).
+  The currency / account-type fields are a listbox rather than a native `<select>`, since
+  the options carry a flag and a sub-label — same shape as `base/select`'s items.
 
 **Both themes** are implemented via the `.dark` class, switched from the business menu →
 Appearance (System / Light / Dark), same as `top-nav.tsx`. Choice persists in
@@ -47,7 +49,8 @@ hoverable area chart and 7d/30d/90d/12m ranges; `All Accounts / Operating / Savi
 Linked` filter; sortable columns; nickname + system-name rows; row menu (view details,
 edit nickname); Add Account menu → Operating / Savings / Link external.
 
-**Create savings account (ENG-2988)** — currency (defaults CAD) + account type
+**Create savings account (ENG-2988)** — currency (defaults CAD, each option carrying its
+flag and country, with per-currency caps shown inline as "Already opened") + account type
 (defaults Savings) + optional nickname, inline validation when a field is cleared,
 loading state, then a success view covering both `active` and pending provisioning,
 with the account id and **View account details**. Domain errors are mapped from

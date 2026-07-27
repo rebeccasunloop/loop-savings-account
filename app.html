@@ -506,6 +506,22 @@ select.control{cursor:pointer;appearance:none;background-image:none;padding-righ
 .meter{height:8px;border-radius:9999px;background:var(--color-bg-tertiary);overflow:hidden;margin-top:10px;}
 .meter > div{height:100%;border-radius:9999px;background:var(--color-brand-500);}
 .kv{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:var(--text-sm);}
+.rows{margin-top:20px;display:flex;flex-direction:column;}
+.rows > div{display:flex;align-items:center;gap:12px;padding:11px 0;font-size:var(--text-sm);}
+.rows > div + div{border-top:1px solid var(--color-border-tertiary);}
+
+/* listbox with leading media (flags), matching base/select's item layout */
+.picker{position:relative;display:block;}
+.picker-trigger{cursor:pointer;text-align:left;}
+.picker-trigger .val{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.picker-trigger .val.ph{color:var(--color-text-placeholder);}
+.picker-trigger > svg{flex-shrink:0;color:var(--color-fg-quaternary);transition:transform .15s;}
+.picker.open .picker-trigger{border-color:transparent;box-shadow:0 0 0 2px var(--color-brand-500);}
+.picker.open .picker-trigger > svg{transform:rotate(180deg);}
+.picker-menu{top:calc(100% + 6px);left:0;width:100%;min-width:0;max-height:264px;overflow-y:auto;}
+.picker-menu .menu-item{align-items:center;}
+.picker-menu .menu-item .label{font-weight:500;color:var(--color-text-primary);}
+.picker-menu .menu-item .sub{display:block;font-size:var(--text-xs);font-weight:400;color:var(--color-text-quaternary);}
 .spinner{width:16px;height:16px;border-radius:9999px;border:2px solid currentColor;border-right-color:transparent;animation:spin .7s linear infinite;}
 @keyframes spin{to{transform:rotate(360deg);}}
 
@@ -1223,8 +1239,7 @@ function detailView() {
           '<div class="s">Paid into this account</div></div>' +
       '</div>' +
       '<p style="margin-top:20px;font-size:var(--text-sm);line-height:1.55;color:var(--color-text-tertiary)">' +
-        'Interest accrues daily on your savings balance and is paid into this account on the 1st of each month. ' +
-        'It’s calculated on the savings balance only — your operating account balance doesn’t earn interest.</p>' +
+        'Interest accrues daily on your savings balance and is paid into this account on the 1st of each month.</p>' +
       '<div style="margin-top:auto;padding-top:20px;border-top:1px solid var(--color-border-tertiary);display:flex;align-items:center;gap:8px">' +
         '<button class="btn btn-ghost btn-sm" data-act="protection" style="margin-left:-8px">' + icon('ShieldTick', 20) + 'How your money is protected</button>' +
       '</div>' +
@@ -1414,6 +1429,33 @@ function modalShell(inner, width) {
     (width ? ' style="width:' + width + 'px"' : '') + '>' + inner + '</div></div>';
 }
 const closeX = () => '<button class="btn-icon modal-x" data-act="close" aria-label="Close">' + icon('XClose', 18) + '</button>';
+// Listbox rather than a native <select>, so options can carry a flag/sub-label.
+// options: [{ value, label, sub?, flag?, disabled? }]
+function pickerField(name, label, options, value, err, hint) {
+  const sel = options.find(o => o.value === value) || options[0];
+  const open = state.form.open === name;
+  return '<div class="field"><span class="lbl">' + esc(label) + '</span>' +
+    '<div class="picker' + (open ? ' open' : '') + '">' +
+      '<button type="button" class="control picker-trigger' + (err ? ' err' : '') + '"' +
+        ' data-act="picker" data-arg="' + name + '" aria-haspopup="listbox" aria-expanded="' + open + '"' +
+        (err ? ' aria-invalid="true"' : '') + '>' +
+        (sel.flag ? '<img class="flag" src="' + sel.flag + '" alt="">' : '') +
+        '<span class="val' + (sel.value === '' ? ' ph' : '') + '">' + esc(sel.label) + '</span>' +
+        icon('ChevronDown', 20) +
+      '</button>' +
+      (open ? '<div class="menu picker-menu" role="listbox" aria-label="' + esc(label) + '">' + options.map(o =>
+        '<button type="button" class="menu-item" role="option" aria-selected="' + (o.value === value) + '"' +
+          (o.disabled ? ' aria-disabled="true"' : ' data-act="pick" data-arg="' + name + ':' + o.value + '"') + '>' +
+          (o.flag ? '<img class="flag" src="' + o.flag + '" alt="">' : '') +
+          '<span class="label"' + (o.value === '' ? ' style="color:var(--color-text-placeholder)"' : '') + '>' + esc(o.label) +
+            (o.sub ? '<span class="sub">' + esc(o.sub) + '</span>' : '') + '</span>' +
+          (o.value === value ? '<span style="color:var(--color-fg-brand-primary);display:flex">' + icon('Check', 16, { sw: 2.5 }) + '</span>' : '') +
+        '</button>').join('') + '</div>' : '') +
+    '</div>' +
+    (err ? '<span class="hint err">' + esc(err) + '</span>' : hint ? '<span class="hint">' + esc(hint) + '</span>' : '') +
+  '</div>';
+}
+
 function selectField(name, label, options, value, err, hint) {
   return '<label class="field"><span class="lbl">' + esc(label) + '</span><span class="select-wrap" style="display:block;position:relative">' +
     '<select class="control' + (err ? ' err' : '') + '" data-field="' + name + '"' + (err ? ' aria-invalid="true"' : '') + '>' +
@@ -1433,12 +1475,14 @@ function savingsModal() {
     const taken = !!savingsFor(c.code);
     return {
       value: c.code,
-      label: c.code + ' — ' + c.label + (!c.enabled ? ' (not available yet)' : taken ? ' (already opened)' : ''),
+      label: c.code + ' — ' + c.label,
+      sub: !c.enabled ? 'Not available yet' : taken ? 'Already opened' : c.country,
+      flag: flagOf(c.code),
       disabled: !c.enabled || taken
     };
   }));
   const kindOptions = [{ value: '', label: 'Select an account type' }].concat(ACCOUNT_KINDS.map(k => ({
-    value: k.code, label: k.label + (k.enabled ? '' : ' (coming soon)'), disabled: !k.enabled
+    value: k.code, label: k.label, sub: k.enabled ? '' : 'Coming soon', disabled: !k.enabled
   })));
 
   return modalShell(
@@ -1449,15 +1493,14 @@ function savingsModal() {
 
     (f.error ? '<div class="alert alert-error">' + icon('AlertCircle', 18) + '<div>' + esc(ERROR_COPY[f.error] || 'Something went wrong. Please try again.') + '</div></div>' : '') +
 
-    selectField('currency', 'Currency', curOptions, f.currency === undefined ? 'CAD' : f.currency, f.errCurrency) +
-    selectField('kind', 'Account type', kindOptions, f.kind === undefined ? 'SAVINGS' : f.kind, f.errKind) +
+    pickerField('currency', 'Currency', curOptions, f.currency === undefined ? 'CAD' : f.currency, f.errCurrency) +
+    pickerField('kind', 'Account type', kindOptions, f.kind === undefined ? 'SAVINGS' : f.kind, f.errKind) +
     '<label class="field"><span class="lbl">Nickname <span class="opt">(optional)</span></span>' +
       '<input class="control" data-field="nickname" value="' + esc(f.nickname || '') + '" placeholder="e.g. Cash Reserve" maxlength="40">' +
-      '<span class="hint">Shown across Loop instead of the default account name. Your official account details don’t change.</span>' +
     '</label>' +
 
     '<div class="alert alert-info">' + icon('InfoCircle', 18) +
-      '<div>Savings accounts move money between your Loop accounts only — no e-Transfers or external payments. ' +
+      '<div>Savings accounts move money between your Loop accounts. ' +
       'Interest is calculated on the savings balance and paid on the 1st of each month.</div></div>' +
 
     '<div class="modal-foot">' +
@@ -1480,7 +1523,7 @@ function savingsSuccess() {
         ? 'We’re setting up your account. This usually takes a few minutes — you’ll be able to add funds as soon as it’s ready.'
         : 'Your account is ready. Add funds from any of your Loop ' + esc(a.cur) + ' accounts to start earning interest.') +
     '</p>' +
-    '<div style="margin-top:20px;border:1px solid var(--color-border-secondary);border-radius:var(--radius-md);padding:14px 16px;display:flex;flex-direction:column;gap:10px">' +
+    '<div class="rows">' +
       infoRow('Account name', esc(displayName(a))) +
       infoRow('Currency', esc(a.cur)) +
       infoRow('Type', 'Savings account') +
@@ -1496,8 +1539,7 @@ function savingsSuccess() {
     '</div>', 480);
 }
 function infoRow(k, v) {
-  return '<div style="display:flex;align-items:center;gap:12px;font-size:var(--text-sm)">' +
-    '<span style="color:var(--color-text-tertiary)">' + esc(k) + '</span>' +
+  return '<div><span style="color:var(--color-text-tertiary)">' + esc(k) + '</span>' +
     '<span style="margin-left:auto;font-weight:600;text-align:right">' + v + '</span></div>';
 }
 
@@ -1686,6 +1728,7 @@ let toastTimer = null;
 function toast(msg) {
   clearTimeout(toastTimer);
   state.toast = msg;
+  renderOverlays();
   toastTimer = setTimeout(() => { state.toast = null; renderOverlays(); }, 3200);
 }
 
@@ -1804,6 +1847,16 @@ const ACTIONS = {
     const tabs = $('.tabs');
     if (tabs) tabs.scrollIntoView({ behavior: 'smooth', block: 'start' });
   },
+  picker: name => { state.form.open = state.form.open === name ? null : name; render(); },
+  pick: arg => {
+    const i = arg.indexOf(':');
+    const name = arg.slice(0, i), value = arg.slice(i + 1);
+    state.form[name] = value;
+    state.form.open = null;
+    // clear the matching inline error as soon as a valid choice is made
+    if (value) state.form[name === 'currency' ? 'errCurrency' : 'errKind'] = '';
+    render();
+  },
   'operating-modal': () => set({ modal: 'operating', menu: null, form: {} }),
   'savings-modal': () => set({ modal: 'savings', menu: null, form: {} }),
   'linked-modal': () => set({ modal: 'linked', menu: null, form: {} }),
@@ -1857,17 +1910,27 @@ const ACTIONS = {
 
 document.addEventListener('click', ev => {
   const el = ev.target.closest('[data-act]');
-  if (!el) return;
-  if (el.getAttribute('aria-disabled') === 'true' || el.disabled) return;
+  // an open listbox closes on any click outside it; whatever was clicked still
+  // runs, and normally its own render() picks up the closed state
+  let closedPicker = false;
+  if (state.form.open && !ev.target.closest('.picker')) {
+    state.form.open = null;
+    closedPicker = true;
+  }
+  const flushPicker = () => { if (closedPicker && document.querySelector('.picker-menu')) render(); };
+  if (!el) return flushPicker();
+  if (el.getAttribute('aria-disabled') === 'true' || el.disabled) return flushPicker();
   const act = el.getAttribute('data-act');
   const fn = ACTIONS[act];
-  if (!fn) return;
+  if (!fn) return flushPicker();
   ev.stopPropagation();
   fn(el.getAttribute('data-arg'), ev);
+  flushPicker();
 });
 document.addEventListener('keydown', ev => {
   if (ev.key === 'Escape') {
-    if (state.modal) set({ modal: null, form: {} });
+    if (state.form.open) { state.form.open = null; render(); }
+    else if (state.modal) set({ modal: null, form: {} });
     else if (state.menu) set({ menu: null });
   }
   if (ev.key === 'Enter' || ev.key === ' ') {
