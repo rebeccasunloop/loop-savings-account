@@ -552,13 +552,18 @@ select.control{cursor:pointer;appearance:none;background-image:none;padding-righ
 }
 .table-foot:hover{background:var(--color-bg-primary_hover);}
 .table-foot svg{width:16px;height:16px;}
+/* hover/focus tooltip, like base/tooltip's TooltipTrigger */
+.info-wrap{position:relative;display:inline-flex;}
 .tooltip-pop{
-  position:absolute;z-index:70;max-width:260px;border-radius:var(--radius-xs);padding:10px 12px;
+  /* width:max-content so shrink-to-fit isn't clamped by the narrow label it anchors to */
+  position:absolute;z-index:70;top:calc(100% + 6px);left:50%;transform:translateX(-50%);
+  width:max-content;max-width:280px;border-radius:var(--radius-xs);padding:10px 12px;
   background:var(--color-neutral-900);color:var(--color-neutral-100);font-size:var(--text-xs);line-height:1.5;
-  box-shadow:var(--shadow-lg);
+  box-shadow:var(--shadow-lg);opacity:0;pointer-events:none;transition:opacity .1s linear;
 }
 .dark .tooltip-pop{background:var(--color-neutral-800);}
-.info-btn{display:inline-flex;color:var(--color-fg-quaternary);cursor:pointer;}
+.info-wrap:hover .tooltip-pop,.info-wrap:focus-within .tooltip-pop{opacity:1;}
+.info-btn{display:inline-flex;color:var(--color-fg-quaternary);cursor:help;}
 .info-btn:hover{color:var(--color-text-tertiary);}
 .info-btn svg{width:16px;height:16px;}
 
@@ -726,7 +731,7 @@ const state = {
   accounts: seedAccounts(),
   filter: 'all', sortKey: null, sortDir: 'asc',
   listRange: '30d', detailRange: '30d', chartTab: 'balance', interestRange: '6m', bottomTab: 'transactions',
-  menu: null, modal: null, form: {}, tooltip: null, toast: null, newId: null,
+  menu: null, modal: null, form: {}, toast: null, newId: null,
   collapsed: false, theme: 'system', protoOpen: false,
   flagCreate: true, nextResult: 'active'
 };
@@ -976,9 +981,9 @@ function chartEmpty(title, desc) {
 }
 
 function infoBtn(key, text) {
-  return '<button class="info-btn" data-act="tip" data-arg="' + esc(key) + '" aria-label="More information">' +
+  return '<span class="info-wrap"><button class="info-btn" aria-label="More information" aria-describedby="tip-' + esc(key) + '">' +
     icon('InfoCircle', 16) + '</button>' +
-    (state.tooltip === key ? '<div class="tooltip-pop" style="top:calc(100% + 6px);left:0">' + esc(text) + '</div>' : '');
+    '<span class="tooltip-pop" role="tooltip" id="tip-' + esc(key) + '">' + esc(text) + '</span></span>';
 }
 
 /* ------------------------------------------------------------- LIST VIEW -- */
@@ -1138,11 +1143,6 @@ function detailView() {
         '<span style="display:flex;color:var(--color-fg-quaternary)">' + icon('ChevronDown', 20) + '</span>' +
       '</button>' +
       (state.menu === 'switch' ? switcherMenu(a) : '') +
-    '</div>' +
-    '<div class="right">' +
-      '<span class="badge ' + (pending ? 'badge-gray' : 'badge-green') + '">' +
-        (pending ? icon('InfoCircle', 12, { sw: 2 }) + 'Setting up' : icon('Check', 12, { sw: 3 }) + 'Active') +
-      '</span>' +
     '</div>' +
   '</div>' +
   // the descriptor only adds information once a nickname replaces the system name
@@ -1618,7 +1618,7 @@ function protectionModal() {
 
 function renderOverlays() {
   let html = '';
-  if (state.menu || state.tooltip) html += '<div class="backdrop" data-act="close-menus"></div>';
+  if (state.menu) html += '<div class="backdrop" data-act="close-menus"></div>';
   if (state.menu && state.menu.indexOf('row:') === 0) {
     const rowAcct = byId(state.menu.slice(4));
     if (rowAcct) html += rowMenu(rowAcct);
@@ -1781,12 +1781,11 @@ const ACTIONS = {
       const r = ev.target.closest('[data-act]').getBoundingClientRect();
       state.menuRect = { top: Math.round(r.bottom + 4), right: Math.round(window.innerWidth - r.right) };
     }
-    set({ menu: state.menu === key ? null : key, tooltip: null });
+    set({ menu: state.menu === key ? null : key });
   },
-  'close-menus': () => set({ menu: null, tooltip: null }),
+  'close-menus': () => set({ menu: null }),
   close: () => set({ modal: null, form: {}, menu: null }),
   backdrop: (a, ev) => { if (ev.target.classList.contains('overlay')) set({ modal: null, form: {} }); },
-  tip: key => set({ tooltip: state.tooltip === key ? null : key, menu: null }),
   filter: key => set({ filter: key, menu: null }),
   sort: key => set({
     sortKey: state.sortKey === key && state.sortDir === 'desc' ? null : key,
@@ -1869,7 +1868,7 @@ document.addEventListener('click', ev => {
 document.addEventListener('keydown', ev => {
   if (ev.key === 'Escape') {
     if (state.modal) set({ modal: null, form: {} });
-    else if (state.menu || state.tooltip) set({ menu: null, tooltip: null });
+    else if (state.menu) set({ menu: null });
   }
   if (ev.key === 'Enter' || ev.key === ' ') {
     const el = ev.target.closest && ev.target.closest('[data-act][role="button"]');
