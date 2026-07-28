@@ -12,6 +12,35 @@ feature (product overview + ENG-2988 "create financial account" UI).
 node build.js && open index.html
 ```
 
+Live: <https://rebeccasunloop.github.io/loop-savings-account/> (GitHub Pages, `main`/root —
+it redeploys on push, so commit the regenerated `index.html` alongside `app.html`).
+
+## Figma
+
+The prototype has been transcribed into
+[Savings Account](https://www.figma.com/design/3pfyJrW5czuhYpYIA24aNV/Savings-Account)
+(file key `3pfyJrW5czuhYpYIA24aNV`) as a component library:
+
+- **Foundations** — 101 variables: 39 primitives (brand ramp derived with the same
+  `oklch(from --loop-green …)` maths as `theme.css`, Tailwind v4 neutral/green/red, Loop's
+  named palette, the `#F8FAFC`/`#D3DAE4` action pair), 43 semantic colours aliased across
+  Light/Dark modes, 18 spacing/radius, 1 typography. All scoped, all with `var()` code
+  syntax. Plus 12 text styles and 6 effect styles.
+- **Components** — 46 Untitled UI icons and 3 currency flags from the real path data, then
+  Button (18 variants), Badge, Segmented control, Tabs, Input, Select trigger, Menu item,
+  Menu tile item, Add Account / filter popovers, Account row, Accounts table, Area chart,
+  Chart card, Interest panel, Sidebar, Top nav and three modals.
+- **Screens** — Accounts list and savings account detail, assembled from instances.
+
+Two substitutions to know: **Articulat CF isn't available in that Figma org**, so type uses
+Inter — `theme.css`'s own declared fallback — with family bound to a `font/family` variable
+so installing Articulat is a one-value swap. And the sidebar wordmark is a text
+placeholder pending the real brand component.
+
+Not yet built there: transaction/tax-document rows, the interest bar chart, and Code
+Connect mappings. The detail screen's chart-card instance also needs an auto-layout fix
+(the component itself is correct).
+
 ## Where the design comes from
 
 | Concern | Source of truth |
