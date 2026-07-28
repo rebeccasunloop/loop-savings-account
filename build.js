@@ -70,20 +70,7 @@ for (const name of ICON_NAMES) {
 /* --------------------------------------------------------------- assets --- */
 const dataUri = file => 'data:image/svg+xml;base64,' + fs.readFileSync(file).toString('base64');
 
-// Sample "proof of account details" PDFs, keyed by currency. Drop a
-// proof-of-account-details-download-<CUR>.pdf into ~/Downloads and rebuild to
-// add one; the UI falls back to CAD for currencies with no document.
-const DOWNLOADS = path.join(HOME, 'Downloads');
-const proofs = {};
-for (const file of fs.readdirSync(DOWNLOADS)) {
-  const m = /^proof-of-account-details-download-([A-Z]{3})\.pdf$/.exec(file);
-  if (!m) continue;
-  proofs[m[1]] = 'data:application/pdf;base64,' +
-    fs.readFileSync(path.join(DOWNLOADS, file)).toString('base64');
-}
-
 const assets = {
-  proofs: proofs,
   logo: dataUri(path.join(DEMO, 'assets', 'loop-logo.svg')),
   accountIcon: dataUri(path.join(DEMO, 'assets', 'loop-account-icon.svg')),
   flags: {
@@ -112,6 +99,5 @@ out = replaceOnce(out, '/*__ASSETS__*/{}', JSON.stringify(assets));
 fs.writeFileSync(path.join(HERE, 'index.html'), out);
 console.log(
   `index.html written — ${(out.length / 1024).toFixed(0)}kB ` +
-  `(${FACES.length} fonts, ${ICON_NAMES.length} icons, ` +
-  `proof PDFs: ${Object.keys(proofs).join(', ') || 'none'})`
+  `(${FACES.length} fonts, ${ICON_NAMES.length} icons)`
 );
