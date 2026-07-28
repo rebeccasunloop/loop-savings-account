@@ -58,11 +58,13 @@ with the account id and **View account details**. Domain errors are mapped from
 `account_holder_not_provisioned`, `account_holder_not_found`.
 
 **Savings detail** — Add Funds / Withdraw / Convert / View Statements / Tax Documents
-(no Send Payment, no e-Transfer — savings is Loop-to-Loop only); Balance ⇄ Interest
-Earned toggle with per-period ranges; interest earned last month, lifetime interest,
-APY, next payout; protection dialog (production's CDIC + RPAA copy, verbatim); a **Tax Documents** modal
-listing T5s with an empty state; Transactions and Tax documents tabs; empty states for a
-freshly created account.
+(no Send Payment, no e-Transfer — savings is Loop-to-Loop only). The chart card has one
+control row: Balance ⇄ Interest Earned as underline tabs, period as pills. The headline
+follows the selected view — Available balance, or interest earned over the period — so
+the number and its label always agree. Side panel carries interest earned last month,
+lifetime interest, APY and next payout; a protection dialog (production's CDIC + RPAA
+copy, currency-aware); a **Tax Documents** modal listing T5s with an empty state; then
+Recent Transactions. Empty states throughout for a freshly created account.
 
 **Also wired** — operating-account creation with plan usage + limit-reached upgrade
 state, link external account, edit nickname, Add Funds / Withdraw between Loop accounts
@@ -84,9 +86,9 @@ External Account*), and reset.
 2. **"Add Account" replaces "Link External Account"**, per the account-page notes —
    which conflicts with the PR's "next to Link External Account". Both are in here: the
    PostHog flag toggles between them.
-3. **Tax documents exists twice**: the *View Tax Documents* action opens a modal (the
-   shape production uses for statements) and there's also a Tax documents tab under the
-   chart. The notes ask for a tab, the demo used a modal. Pick one — see the review.
+3. **Tax documents has one entry point**: the *View Tax Documents* action opens a modal,
+   in the shape production uses for statements. The meeting notes asked for a tab; the
+   modal won because the dataset is one row per year and a tab duplicated the entry point.
 4. **Two-line account rows** (display name + descriptor) from the demo, rather than
    production's single line — with nicknames surfaced, the second line is what tells
    you which underlying account you're looking at. Worth confirming.
@@ -99,8 +101,9 @@ External Account*), and reset.
    deliberate token deviation.
 7. Interest rate (3.25% APY), FX rates and T5 issue dates are **placeholders** for
    layout only. The protection modal uses production's CDIC + RPAA copy verbatim, which
-   is CAD-specific ("Loop CAD Account Balances are held at Bank of Montreal®") and so
-   reads wrong on a USD savings account — a USD variant needs compliance input. Open
+   is CAD-specific ("Loop CAD Account Balances are held at Bank of Montreal®"). Non-CAD
+   accounts get the same sentence with no institution named, since the real partner per
+   currency needs compliance input — that clause is the one thing to check before use. Open
    items from the meeting ("operating" vs "deposit account" naming, Nickname vs Rename)
    are still unresolved in the copy.
 

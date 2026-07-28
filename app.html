@@ -583,6 +583,14 @@ select.control{cursor:pointer;appearance:none;background-image:none;padding-righ
   padding:8px 2px 12px;font-size:var(--text-sm);font-weight:600;color:var(--color-text-quaternary);
   cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;
 }
+/* card header: underline tabs left, period pills right, one row tall */
+.card.tabbed{padding-top:0;}
+.card-tabs{
+  display:flex;align-items:stretch;gap:20px;margin:0 -24px;padding:0 24px;
+  border-bottom:1px solid var(--color-border-secondary);
+}
+.card-tabs .tab{display:flex;align-items:center;min-height:48px;padding:0 2px;}
+.card-tabs .range{margin-left:auto;display:flex;align-items:center;padding-left:12px;}
 .tab:hover{color:var(--color-text-secondary);}
 .tab.on{color:var(--color-fg-brand-primary);border-bottom-color:var(--color-fg-brand-primary);}
 .dark .tab.on{color:var(--loop-bright-green);border-bottom-color:var(--loop-bright-green);}
@@ -771,7 +779,7 @@ const state = {
   view: 'list', detailId: null,
   accounts: seedAccounts(),
   filter: 'all', sortKey: null, sortDir: 'asc',
-  listRange: '30d', detailRange: '30d', chartTab: 'balance', interestRange: '6m', bottomTab: 'transactions',
+  listRange: '30d', detailRange: '30d', chartTab: 'balance', interestRange: '6m',
   menu: null, modal: null, form: {}, toast: null, newId: null,
   collapsed: false, theme: 'system', protoOpen: false,
   flagCreate: true, nextResult: 'active'
@@ -1167,7 +1175,9 @@ function detailView() {
   const last = interest.length ? interest[interest.length - 1].amount : 0;
   const payout = firstOfNextMonth(TODAY);
 
+  const isBalance = state.chartTab === 'balance';
   const iRanges = [['3m', '3 months'], ['6m', '6 months'], ['1y', '1 year'], ['all', 'All']];
+  const iRangeLabel = { '3m': 'the last 3 months', '6m': 'the last 6 months', '1y': 'the last year', 'all': 'the life of this account' }[state.interestRange];
   const iCount = { '3m': 3, '6m': 6, '1y': 12, 'all': interest.length }[state.interestRange] || 6;
   const iShown = interest.slice(Math.max(0, interest.length - iCount));
   const iTotal = iShown.reduce((s, m) => s + m.amount, 0);
@@ -1202,28 +1212,34 @@ function detailView() {
   '</div>' +
 
   '<div class="detail-grid">' +
-    '<section class="card chart-card">' +
-      '<div style="display:flex;flex-wrap:wrap;gap:12px;align-items:flex-start;justify-content:space-between">' +
-        '<div style="display:flex;align-items:center;gap:6px;font-size:var(--text-sm);color:var(--color-text-tertiary);position:relative">' +
-          '<span>Available</span>' + infoBtn('avail', 'Funds you can move right now. Savings balances are separate from your operating account balance.') +
-        '</div>' +
-        '<div style="display:flex;flex-direction:column;align-items:flex-end;gap:8px">' +
-          segControl([['balance', 'Balance'], ['interest', 'Interest Earned']], state.chartTab, 'chart-tab') +
-          (state.chartTab === 'balance'
+    '<section class="card chart-card tabbed">' +
+      // one control row: view as underline tabs, period as pills — never two
+      // adjacent segmented controls, and never two rows deep
+      '<div class="card-tabs">' +
+        '<button class="tab' + (isBalance ? ' on' : '') + '" data-act="chart-tab" data-arg="balance">Balance</button>' +
+        '<button class="tab' + (isBalance ? '' : ' on') + '" data-act="chart-tab" data-arg="interest">Interest Earned</button>' +
+        '<span class="range">' +
+          (isBalance
             ? (ranges.length ? segControl(ranges.map(r => [r[0], r[1]]), state.detailRange, 'detail-range') : '')
             : segControl(iRanges, state.interestRange, 'interest-range')) +
-        '</div>' +
+        '</span>' +
       '</div>' +
 
-      '<div style="display:flex;align-items:flex-end;gap:8px;margin-top:8px">' +
+      // headline always describes the selected view
+      '<div style="display:flex;align-items:center;gap:6px;margin-top:16px;font-size:var(--text-sm);color:var(--color-text-tertiary)">' +
+        (isBalance
+          ? '<span>Available</span>' + infoBtn('avail', 'Funds you can move right now. Savings balances are separate from your operating account balance.')
+          : '<span>Interest earned</span>' + infoBtn('earned', 'Interest paid into this account over the selected period. It accrues daily and is paid on the 1st of each month.')) +
+      '</div>' +
+      '<div style="display:flex;align-items:flex-end;gap:8px;margin-top:2px">' +
         '<img class="flag" style="width:24px;height:24px;margin-bottom:6px" src="' + flagOf(cur) + '" alt="">' +
         '<h2 class="tnum" style="font-size:var(--text-display-sm);line-height:var(--text-display-sm-lh);font-weight:600;letter-spacing:-.4px">' +
-          esc(fmt(a.balance || 0, cur)) + '</h2>' +
+          esc(fmt(isBalance ? (a.balance || 0) : iTotal, cur)) + '</h2>' +
         '<span style="font-size:var(--text-sm);color:var(--color-text-tertiary);margin-bottom:6px">' + esc(cur) + '</span>' +
       '</div>' +
 
-      (state.chartTab === 'balance'
-        ? '<div style="margin-top:12px">' + (shown.length > 1 ? deltaBadge(shown, cur) : '') + '</div>' +
+      (isBalance
+        ? (shown.length > 1 ? '<div style="margin-top:10px">' + deltaBadge(shown, cur) + '</div>' : '') +
           '<div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:4px 24px;max-width:320px;margin-top:16px">' +
             '<div class="metric"><div class="k">' + icon('ArrowDownLeft', 14) + 'Pending In</div><div class="v tnum" style="font-size:var(--text-md)">' + esc(fmt(0, cur, { signDisplay: 'exceptZero' })) + '</div></div>' +
             '<div class="metric"><div class="k">' + icon('ArrowUpRight', 14) + 'Processing Out</div><div class="v tnum" style="font-size:var(--text-md)">' + esc(fmt(0, cur, { signDisplay: 'exceptZero' })) + '</div></div>' +
@@ -1233,15 +1249,8 @@ function detailView() {
               ? '<div class="chart-host" data-chart="detail"></div>'
               : chartEmpty('No balance history yet', 'Your balance trend will appear here once this account has activity.')) +
           '</div>'
-        : '<div style="margin-top:12px">' +
-            (iShown.length
-              ? '<div style="display:inline-flex;align-items:center;gap:8px;background:var(--loop-light-green);border-radius:9999px;padding:6px 14px 6px 8px">' +
-                  '<span style="width:20px;height:20px;border-radius:9999px;background:#fff;color:var(--color-brand-600);display:flex;align-items:center;justify-content:center">' + icon('TrendUp01', 12, { sw: 3 }) + '</span>' +
-                  '<span class="tnum" style="font-size:var(--text-sm);font-weight:600;color:var(--color-brand-800)">' + esc(fmt(iTotal, cur)) + ' interest earned</span>' +
-                  '<span style="font-size:var(--text-xs);color:var(--color-brand-700)">over selected period</span>' +
-                '</div>'
-              : '') +
-          '</div>' +
+        : '<div style="font-size:var(--text-sm);color:var(--color-text-tertiary);margin-top:6px">' +
+            esc(iShown.length ? 'over ' + iRangeLabel : 'no interest paid yet') + '</div>' +
           '<div style="margin-top:16px">' +
             (iShown.length ? interestBars(iShown, iMax, cur)
               : chartEmpty('No interest earned yet', 'Interest is calculated on your savings balance and paid on the 1st of each month. Your first payout is expected ' + longDate(payout) + '.')) +
@@ -1271,11 +1280,9 @@ function detailView() {
     '</section>' +
   '</div>' +
 
-  '<div class="tabs">' +
-    '<button class="tab' + (state.bottomTab === 'transactions' ? ' on' : '') + '" data-act="tab" data-arg="transactions">Transactions</button>' +
-    '<button class="tab' + (state.bottomTab === 'tax' ? ' on' : '') + '" data-act="tab" data-arg="tax">Tax documents</button>' +
-  '</div>' +
-  '<div style="margin-top:24px">' + (state.bottomTab === 'transactions' ? txTable(a) : taxTable(a)) + '</div>';
+  // Tax documents live in the View Tax Documents modal only — one entry point.
+  '<h2 style="margin:32px 0 16px;font-size:var(--text-lg);line-height:var(--text-lg-lh);font-weight:600">Recent Transactions</h2>' +
+  txTable(a);
 }
 
 function interestBars(months, max, cur) {
@@ -1340,30 +1347,6 @@ function taxYears(a) {
     }
   }
   return years.reverse();
-}
-
-function taxTable(a) {
-  const years = taxYears(a);
-  if (!years.length) {
-    return '<div class="table-wrap"><div style="padding:56px 24px;display:flex;flex-direction:column;align-items:center;gap:8px;text-align:center">' +
-      '<span class="featured-icon">' + icon('File02', 22) + '</span>' +
-      '<div class="empty-title">No tax documents yet</div>' +
-      '<div class="empty-desc">A T5 slip is issued for each tax year in which this account earned interest. ' +
-      'You’ll get one T5 per currency, available here after year end.</div></div></div>';
-  }
-  const rows = years.map(y =>
-    '<tr><td><div style="display:flex;align-items:center;gap:8px"><span class="featured-icon" style="width:32px;height:32px">' +
-      icon('File02', 16) + '</span><div><div style="font-weight:600">T5 — ' + y.year + '</div>' +
-      '<div class="acct-sub">Statement of investment income · ' + esc(a.cur) + '</div></div></div></td>' +
-      '<td class="tnum">' + esc(fmt(y.total, a.cur)) + '</td>' +
-      '<td>' + esc('Issued ' + longDate(new Date(y.year + 1, 1, 28))) + '</td>' +
-      '<td><span class="badge badge-green">Available</span></td>' +
-      '<td><div style="display:flex;justify-content:flex-end">' +
-        '<button class="btn btn-ghost btn-sm" data-act="soon" data-arg="Download">' + icon('Download01', 18) + 'Download</button>' +
-      '</div></td></tr>').join('');
-  return '<div class="table-wrap"><table aria-label="Tax documents">' +
-    '<thead class="shaded"><tr><th>Document</th><th>Interest reported</th><th>Availability</th><th>Status</th><th></th></tr></thead>' +
-    '<tbody>' + rows + '</tbody></table></div>';
 }
 
 /* ============================================================= MENUS ===== */
@@ -1692,16 +1675,21 @@ function panelModal(o) {
     '</div></div>';
 }
 
-// Copy is production's, verbatim. Note it is CAD-specific — see README.
+// Production's copy, verbatim for CAD. The partner-bank sentence is CAD-specific,
+// so other currencies get the same sentence without naming an institution —
+// the real partner per currency needs compliance input (see README).
 function protectionModal() {
+  const cur = (byId(state.detailId) || {}).cur || 'CAD';
+  const heldAt = cur === 'CAD'
+    ? 'Loop CAD Account Balances are held at Bank of Montreal®, a member of the CDIC, and are eligible for CDIC deposit insurance up to applicable limits'
+    : 'Loop ' + cur + ' Account Balances are held at a CDIC member institution and are eligible for CDIC deposit insurance up to applicable limits';
   return panelModal({
     title: 'Your Money is Protected with Loop', ic: 'ShieldTick', width: 616,
     body:
       '<div class="doc-section"><h3>CDIC Protection</h3><p>' +
         'Canada Deposit Insurance Corporation (CDIC) is a federal crown corporation that protects deposits held at ' +
         'its member financial institutions in the event of one of those institutions failing. Standard coverage is up ' +
-        'to $100,000 CAD per depositor, per bank. Loop CAD Account Balances are held at Bank of Montreal®, a member ' +
-        'of the CDIC, and are eligible for CDIC deposit insurance up to applicable limits' +
+        'to $100,000 CAD per depositor, per bank. ' + esc(heldAt) +
       '</p></div>' +
       '<div class="doc-section"><h3>Regulated in Canada</h3><p>' +
         'Loop Payments Inc. (Loop) is registered with the Bank of Canada as a Payment Service Provider under the ' +
@@ -1815,7 +1803,7 @@ function openDetail(id) {
   if (!a) return;
   set({
     view: 'detail', detailId: id, modal: null, menu: null, form: {},
-    chartTab: 'balance', detailRange: '30d', interestRange: '6m', bottomTab: 'transactions'
+    chartTab: 'balance', detailRange: '30d', interestRange: '6m'
   });
   window.scrollTo(0, 0);
 }
@@ -1918,12 +1906,6 @@ const ACTIONS = {
   'detail-range': r => set({ detailRange: r }),
   'chart-tab': t => set({ chartTab: t }),
   'interest-range': r => set({ interestRange: r }),
-  tab: t => {
-    state.bottomTab = t;
-    render();
-    const tabs = $('.tabs');
-    if (tabs) tabs.scrollIntoView({ behavior: 'smooth', block: 'start' });
-  },
   picker: name => { state.form.open = state.form.open === name ? null : name; render(); },
   pick: arg => {
     const i = arg.indexOf(':');
