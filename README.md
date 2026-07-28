@@ -129,11 +129,12 @@ External Account*), and reset.
    detail pages are out of scope.
 6. **Neutral surfaces use `#F8FAFC` → `#D3DAE4` on hover**: the Add Account menu tiles
    (icon stroke darkens with them), the detail page's secondary action pills, and the
-   All Accounts filter chip. `#045B3F` with white text is the one solid action per page —
+   All Accounts filter chip — buttons hover to `#CDD5DF`, the menu tiles to `#D3DAE4`. `#045B3F` with white text is the one solid action per page —
    Add Account on the list, Add Funds on the detail page. Those hexes are slate, not on Loop's
    neutral (pure grey) ramp, so they sit in the CSS as literal values; dark mode maps the
    pair to `bg-tertiary` / `bg-quaternary`. Measured contrast: 17.1:1 rest and 12.7:1
-   hover in light, 14.5:1 / 9.9:1 in dark, 8.2:1 for white on the green — all past AA.
+   hover in light (12.1:1 on the buttons' `#CDD5DF`), 14.5:1 / 9.9:1 in dark, 8.2:1 for
+   white on the green — all past AA.
    Consequence: no lilac is left in the UI, so the DS's `color="filter"` Button variant
    goes unused here even though production still uses it for that chip.
 7. **`--color-fg-quaternary` in dark mode** is `neutral-500` here, not `theme.css`'s
