@@ -60,8 +60,9 @@ with the account id and **View account details**. Domain errors are mapped from
 **Savings detail** — Add Funds / Withdraw / Convert / View Statements / Tax Documents
 (no Send Payment, no e-Transfer — savings is Loop-to-Loop only); Balance ⇄ Interest
 Earned toggle with per-period ranges; interest earned last month, lifetime interest,
-APY, next payout; protection dialog; Transactions and **Tax documents** tabs (T5 per
-currency, per completed tax year); empty states for a freshly created account.
+APY, next payout; protection dialog (production's CDIC + RPAA copy, verbatim); a **Tax Documents** modal
+listing T5s with an empty state; Transactions and Tax documents tabs; empty states for a
+freshly created account.
 
 **Also wired** — operating-account creation with plan usage + limit-reached upgrade
 state, link external account, edit nickname, Add Funds / Withdraw between Loop accounts

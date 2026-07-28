@@ -49,7 +49,7 @@ const ICON_NAMES = [
   'ChevronDown', 'ChevronUp', 'ChevronRight', 'ChevronSelectorVertical', 'Plus',
   'XClose', 'Check', 'CheckCircle', 'InfoCircle', 'HelpCircle', 'AlertCircle',
   'DotsVertical', 'ArrowNarrowLeft', 'Edit02', 'Copy01', 'Link03', 'Lock01',
-  'Sun', 'Moon01', 'Monitor01', 'LogOut01', 'Sliders02', 'RefreshCcw01',
+  'Sun', 'Moon01', 'Monitor01', 'LogOut01', 'Sliders02', 'RefreshCcw01', 'SearchMd',
   // accounts
   'BankNote01', 'CoinsSwap01', 'ArrowCircleBrokenUpRight', 'File02', 'FileCheck02',
   'Download01', 'ShieldTick', 'PiggyBank01', 'ArrowUpRight', 'ArrowDownLeft',

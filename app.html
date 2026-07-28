@@ -506,6 +506,31 @@ select.control{cursor:pointer;appearance:none;background-image:none;padding-righ
 .meter{height:8px;border-radius:9999px;background:var(--color-bg-tertiary);overflow:hidden;margin-top:10px;}
 .meter > div{height:100%;border-radius:9999px;background:var(--color-brand-500);}
 .kv{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:var(--text-sm);}
+/* titlebar + divider modal (protection, statements, tax documents) */
+.modal.flush{padding:0;}
+.modal-titlebar{display:flex;align-items:center;gap:10px;padding:16px 20px;border-bottom:1px solid var(--color-border-secondary);}
+.modal-titlebar h2{font-size:var(--text-md);line-height:var(--text-md-lh);font-weight:600;}
+.modal-titlebar .tb-ic{display:flex;flex-shrink:0;color:var(--color-fg-primary);}
+.tb-x{margin-left:auto;flex-shrink:0;display:flex;cursor:pointer;padding:2px;border-radius:6px;color:var(--color-brand-500);}
+.dark .tb-x{color:var(--loop-bright-green);}
+.tb-x:hover{opacity:.7;}
+.modal-body{padding:20px;}
+.doc-section + .doc-section{margin-top:18px;}
+.doc-section h3{font-size:var(--text-sm);line-height:var(--text-sm-lh);font-weight:600;}
+.doc-section p{margin-top:2px;font-size:var(--text-sm);line-height:1.6;color:var(--color-text-secondary);}
+.empty-sq{
+  width:44px;height:44px;border-radius:var(--radius-xs);display:flex;align-items:center;justify-content:center;
+  box-shadow:inset 0 0 0 1px var(--color-border-secondary);color:var(--color-fg-primary);
+}
+.doc-row{display:flex;align-items:center;gap:12px;padding:12px 0;}
+.doc-row + .doc-row{border-top:1px solid var(--color-border-tertiary);}
+.doc-row .doc-ic{
+  width:34px;height:34px;flex-shrink:0;border-radius:var(--radius-xs);display:flex;align-items:center;justify-content:center;
+  box-shadow:inset 0 0 0 1px var(--color-border-secondary);color:var(--color-text-tertiary);
+}
+.doc-row .t{display:block;font-size:var(--text-sm);font-weight:600;}
+.doc-row .s{display:block;font-size:var(--text-xs);color:var(--color-text-quaternary);}
+.doc-row .btn{margin-left:auto;}
 .rows{margin-top:20px;display:flex;flex-direction:column;}
 .rows > div{display:flex;align-items:center;gap:12px;padding:11px 0;font-size:var(--text-sm);}
 .rows > div + div{border-top:1px solid var(--color-border-tertiary);}
@@ -1173,7 +1198,7 @@ function detailView() {
     '<button class="btn btn-secondary"' + (pending ? ' disabled' : ' data-act="withdraw"') + '>' + icon('ArrowCircleBrokenUpRight', 20) + 'Withdraw</button>' +
     '<button class="btn btn-secondary" data-act="soon" data-arg="Convert">' + icon('CoinsSwap01', 20) + 'Convert</button>' +
     '<button class="btn btn-secondary" data-act="soon" data-arg="Statements">' + icon('File02', 20) + 'View Statements</button>' +
-    '<button class="btn btn-secondary" data-act="tab" data-arg="tax">' + icon('FileCheck02', 20) + 'View Tax Documents</button>' +
+    '<button class="btn btn-secondary" data-act="taxdocs">' + icon('FileCheck02', 20) + 'View Tax Documents</button>' +
   '</div>' +
 
   '<div class="detail-grid">' +
@@ -1304,8 +1329,8 @@ function txTable(a) {
     '<div class="table-foot" data-act="soon" data-arg="Transactions">View All Transactions' + icon('ArrowNarrowRight', 16) + '</div></div>';
 }
 
-function taxTable(a) {
-  // One T5 per currency, issued for completed tax years only.
+// One T5 per currency, issued for completed tax years only.
+function taxYears(a) {
   const years = [];
   if (a.interest && a.interest.length) {
     const first = a.interest[0].date.getFullYear();
@@ -1314,6 +1339,11 @@ function taxTable(a) {
       if (total > 0) years.push({ year: y, total: total });
     }
   }
+  return years.reverse();
+}
+
+function taxTable(a) {
+  const years = taxYears(a);
   if (!years.length) {
     return '<div class="table-wrap"><div style="padding:56px 24px;display:flex;flex-direction:column;align-items:center;gap:8px;text-align:center">' +
       '<span class="featured-icon">' + icon('File02', 22) + '</span>' +
@@ -1321,7 +1351,7 @@ function taxTable(a) {
       '<div class="empty-desc">A T5 slip is issued for each tax year in which this account earned interest. ' +
       'You’ll get one T5 per currency, available here after year end.</div></div></div>';
   }
-  const rows = years.reverse().map(y =>
+  const rows = years.map(y =>
     '<tr><td><div style="display:flex;align-items:center;gap:8px"><span class="featured-icon" style="width:32px;height:32px">' +
       icon('File02', 16) + '</span><div><div style="font-weight:600">T5 — ' + y.year + '</div>' +
       '<div class="acct-sub">Statement of investment income · ' + esc(a.cur) + '</div></div></div></td>' +
@@ -1648,14 +1678,60 @@ function transferModal(kind) {
       '<button class="btn btn-primary" data-act="submit-transfer" data-arg="' + kind + '">' + (isAdd ? 'Add funds' : 'Withdraw') + '</button></div>', 480);
 }
 
+// Titlebar + divider shell used by the production protection / statements modals.
+function panelModal(o) {
+  return '<div class="overlay" data-act="backdrop">' +
+    '<div class="modal flush" role="dialog" aria-modal="true" aria-label="' + esc(o.title) + '"' +
+      ' style="width:' + (o.width || 560) + 'px">' +
+      '<div class="modal-titlebar">' +
+        (o.ic ? '<span class="tb-ic">' + icon(o.ic, 20) + '</span>' : '') +
+        '<h2>' + esc(o.title) + '</h2>' +
+        '<button class="tb-x" data-act="close" aria-label="Close">' + icon('XClose', 20) + '</button>' +
+      '</div>' +
+      '<div class="modal-body">' + o.body + '</div>' +
+    '</div></div>';
+}
+
+// Copy is production's, verbatim. Note it is CAD-specific — see README.
 function protectionModal() {
-  return modalShell(
-    '<div class="modal-head"><span class="featured-icon brand" style="width:44px;height:44px">' + icon('ShieldTick', 22) + '</span>' + closeX() + '</div>' +
-    '<h2 style="margin-top:16px;font-size:var(--text-lg);font-weight:600">How your money is protected</h2>' +
-    '<p style="margin-top:8px;font-size:var(--text-sm);line-height:1.6;color:var(--color-text-tertiary)">' +
-      'Funds in your Loop savings account are held with Loop’s regulated banking partners. Eligible deposits are protected up to applicable CDIC coverage limits.</p>' +
-    '<p style="margin-top:10px;font-size:var(--text-xs);color:var(--color-text-quaternary)">Placeholder copy for design review — final wording needs compliance sign-off.</p>' +
-    '<div class="modal-foot"><button class="btn btn-primary" data-act="close">Got it</button></div>', 440);
+  return panelModal({
+    title: 'Your Money is Protected with Loop', ic: 'ShieldTick', width: 616,
+    body:
+      '<div class="doc-section"><h3>CDIC Protection</h3><p>' +
+        'Canada Deposit Insurance Corporation (CDIC) is a federal crown corporation that protects deposits held at ' +
+        'its member financial institutions in the event of one of those institutions failing. Standard coverage is up ' +
+        'to $100,000 CAD per depositor, per bank. Loop CAD Account Balances are held at Bank of Montreal®, a member ' +
+        'of the CDIC, and are eligible for CDIC deposit insurance up to applicable limits' +
+      '</p></div>' +
+      '<div class="doc-section"><h3>Regulated in Canada</h3><p>' +
+        'Loop Payments Inc. (Loop) is registered with the Bank of Canada as a Payment Service Provider under the ' +
+        'Retail Payments Activities Act. As a payment service provider, Loop must meet strict standards for ' +
+        'safeguarding customer funds, managing operational and technology risks, and maintaining strong policies, ' +
+        'controls, and incident-response procedures' +
+      '</p></div>'
+  });
+}
+
+function taxDocsModal() {
+  const a = byId(state.detailId);
+  if (!a) return '';
+  const years = taxYears(a);
+  const body = years.length
+    ? years.map(y =>
+        '<div class="doc-row"><span class="doc-ic">' + icon('File02', 18) + '</span>' +
+          '<span style="min-width:0"><span class="t">T5 — ' + y.year + '</span>' +
+          '<span class="s">Statement of investment income · ' + esc(a.cur) + ' · ' + esc(fmt(y.total, a.cur)) + ' interest</span></span>' +
+          '<button class="btn btn-tertiary btn-sm" data-act="soon" data-arg="Download">' + icon('Download01', 16) + 'Download</button>' +
+        '</div>').join('') +
+      '<p style="margin-top:14px;font-size:var(--text-xs);color:var(--color-text-quaternary);line-height:1.5">' +
+        'One T5 is issued per currency for each tax year in which the account earned interest.</p>'
+    : '<div style="display:flex;flex-direction:column;align-items:center;gap:12px;padding:24px 8px 12px;text-align:center">' +
+        '<span class="empty-sq">' + icon('SearchMd', 20) + '</span>' +
+        '<div style="font-size:var(--text-md);font-weight:600">No tax documents available</div>' +
+        '<div class="empty-desc" style="font-size:var(--text-sm)">A T5 slip appears here after the first tax year in ' +
+        'which this account earns interest.</div>' +
+      '</div>';
+  return panelModal({ title: 'Tax Documents', width: 512, body: body });
 }
 
 function renderOverlays() {
@@ -1671,6 +1747,7 @@ function renderOverlays() {
   else if (m === 'linked') html += linkedModal();
   else if (m === 'nickname') html += nicknameModal();
   else if (m === 'protection') html += protectionModal();
+  else if (m === 'taxdocs') html += taxDocsModal();
   else if (m === 'addfunds' || m === 'withdraw') html += transferModal(m);
   if (state.toast) {
     html += '<div class="toast" role="status"><span class="tick">' + icon('Check', 12, { sw: 3 }) + '</span>' + esc(state.toast) + '</div>';
@@ -1895,6 +1972,7 @@ const ACTIONS = {
   withdraw: () => set({ modal: 'withdraw', form: {} }),
   'submit-transfer': kind => submitTransfer(kind),
   protection: () => set({ modal: 'protection' }),
+  taxdocs: () => set({ modal: 'taxdocs' }),
   theme: t => { state.theme = t; localStorage.setItem('loop-proto-theme', t); set({ menu: null }); },
   flag: v => set({ flagCreate: v === 'on', menu: null }),
   'proto-toggle': () => set({ protoOpen: !state.protoOpen }),
