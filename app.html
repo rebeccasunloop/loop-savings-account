@@ -307,11 +307,7 @@ main{display:flex;flex-direction:column;width:100%;padding:0 32px 48px;}
   box-shadow:inset 0 0 0 1px var(--color-border-primary),var(--shadow-xs);
 }
 .dark .btn-neutral:hover:not(:disabled){background:var(--color-bg-quaternary);}
-.btn-filter{
-  background:var(--color-button-filter-bg);color:var(--color-button-filter-text);
-  box-shadow:var(--shadow-xs-skeuomorphic);padding:8px 16px;
-}
-.btn-filter:hover{background:var(--color-button-filter-bg_hover);}
+.btn-chip{padding:8px 16px;}
 .btn-purple{background:var(--color-button-purple-bg);color:#fff;box-shadow:var(--shadow-xs);}
 .btn-purple:hover{background:var(--color-button-purple-bg_hover);}
 .btn-tertiary{
@@ -1064,7 +1060,7 @@ function listView() {
 
   const addBtn = state.flagCreate
     ? '<div style="position:relative">' +
-        '<button class="btn btn-secondary" data-act="menu" data-arg="add" aria-haspopup="menu">' +
+        '<button class="btn btn-brand" data-act="menu" data-arg="add" aria-haspopup="menu">' +
         icon('Plus', 20) + '<span>Add Account</span>' + icon('ChevronDown', 20) + '</button>' +
         (state.menu === 'add' ? addMenu() : '') +
       '</div>'
@@ -1100,7 +1096,7 @@ function listView() {
   '</section>' +
 
   '<div style="display:flex;margin-bottom:24px"><div style="position:relative">' +
-    '<button class="btn btn-filter" data-act="menu" data-arg="filter" aria-haspopup="menu">' +
+    '<button class="btn btn-neutral btn-chip" data-act="menu" data-arg="filter" aria-haspopup="menu">' +
       '<span>' + esc((FILTERS.find(f => f[0] === state.filter) || FILTERS[0])[1]) + '</span>' + icon('ChevronDown', 20) +
     '</button>' +
     (state.menu === 'filter' ? filterMenu() : '') +
