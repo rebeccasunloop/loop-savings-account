@@ -84,7 +84,9 @@ External Account*), and reset.
 2. **"Add Account" replaces "Link External Account"**, per the account-page notes —
    which conflicts with the PR's "next to Link External Account". Both are in here: the
    PostHog flag toggles between them.
-3. **Tax documents is a tab**, not a modal (notes say tab; the demo used a modal).
+3. **Tax documents exists twice**: the *View Tax Documents* action opens a modal (the
+   shape production uses for statements) and there's also a Tax documents tab under the
+   chart. The notes ask for a tab, the demo used a modal. Pick one — see the review.
 4. **Two-line account rows** (display name + descriptor) from the demo, rather than
    production's single line — with nicknames surfaced, the second line is what tells
    you which underlying account you're looking at. Worth confirming.
@@ -95,10 +97,12 @@ External Account*), and reset.
 6. **`--color-fg-quaternary` in dark mode** is `neutral-500` here, not `theme.css`'s
    `--loop-bright-purple` — purple icon chrome reads as an accent/bug in review. Single
    deliberate token deviation.
-7. Interest rate (3.25% APY), FX rates, T5 issue dates and CDIC copy are **placeholders**
-   for layout only — the protection wording needs compliance sign-off, and open items
-   from the meeting ("operating" vs "deposit account" naming, Nickname vs Rename) are
-   unresolved in the copy.
+7. Interest rate (3.25% APY), FX rates and T5 issue dates are **placeholders** for
+   layout only. The protection modal uses production's CDIC + RPAA copy verbatim, which
+   is CAD-specific ("Loop CAD Account Balances are held at Bank of Montreal®") and so
+   reads wrong on a USD savings account — a USD variant needs compliance input. Open
+   items from the meeting ("operating" vs "deposit account" naming, Nickname vs Rename)
+   are still unresolved in the copy.
 
 Verified in Chromium (light + dark) across the list, both detail states, all modals,
 validation and error states — no console errors.
