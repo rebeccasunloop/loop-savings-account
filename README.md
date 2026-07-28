@@ -65,8 +65,9 @@ follows the selected view — Available balance, or interest earned over the per
 the number and its label always agree. Side panel carries interest earned last month,
 lifetime interest, APY and next payout, and a footer of two icons as production has it —
 protection dialog (production's CDIC + RPAA copy, currency-aware) on the left, and an
-instant **proof of account details** PDF download on the right. A **Tax Documents** modal
-lists T5s with an empty state, then Recent Transactions. Empty states throughout for a
+instant **proof of account details** PDF download on the right. Below that, Transactions
+and **Tax documents** tabs — the tax tab lists T5s per completed tax year with a download
+per slip, and an empty state until the first year closes. Empty states throughout for a
 freshly created account.
 
 The proof-of-account-details PDFs are inlined at build time from
@@ -95,9 +96,9 @@ External Account*), and reset.
 2. **"Add Account" replaces "Link External Account"**, per the account-page notes —
    which conflicts with the PR's "next to Link External Account". Both are in here: the
    PostHog flag toggles between them.
-3. **Tax documents has one entry point**: the *View Tax Documents* action opens a modal,
-   in the shape production uses for statements. The meeting notes asked for a tab; the
-   modal won because the dataset is one row per year and a tab duplicated the entry point.
+3. **Tax documents has one entry point**: the tab below the chart, per the meeting notes.
+   It briefly had both a tab and a *View Tax Documents* action opening a modal; the button
+   is gone and the tab keeps the modal's leaner row-per-slip design.
 4. **Two-line account rows** (display name + descriptor) from the demo, rather than
    production's single line — with nicknames surfaced, the second line is what tells
    you which underlying account you're looking at. Worth confirming.

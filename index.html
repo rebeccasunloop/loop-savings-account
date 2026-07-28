@@ -787,7 +787,7 @@ const state = {
   view: 'list', detailId: null,
   accounts: seedAccounts(),
   filter: 'all', sortKey: null, sortDir: 'asc',
-  listRange: '30d', detailRange: '30d', chartTab: 'balance', interestRange: '6m',
+  listRange: '30d', detailRange: '30d', chartTab: 'balance', interestRange: '6m', bottomTab: 'transactions',
   menu: null, modal: null, form: {}, toast: null, newId: null,
   collapsed: false, theme: 'system', protoOpen: false,
   flagCreate: true, nextResult: 'active'
@@ -1216,7 +1216,6 @@ function detailView() {
     '<button class="btn btn-secondary"' + (pending ? ' disabled' : ' data-act="withdraw"') + '>' + icon('ArrowCircleBrokenUpRight', 20) + 'Withdraw</button>' +
     '<button class="btn btn-secondary" data-act="soon" data-arg="Convert">' + icon('CoinsSwap01', 20) + 'Convert</button>' +
     '<button class="btn btn-secondary" data-act="soon" data-arg="Statements">' + icon('File02', 20) + 'View Statements</button>' +
-    '<button class="btn btn-secondary" data-act="taxdocs">' + icon('FileCheck02', 20) + 'View Tax Documents</button>' +
   '</div>' +
 
   '<div class="detail-grid">' +
@@ -1295,9 +1294,12 @@ function detailView() {
     '</section>' +
   '</div>' +
 
-  // Tax documents live in the View Tax Documents modal only — one entry point.
-  '<h2 style="margin:32px 0 16px;font-size:var(--text-lg);line-height:var(--text-lg-lh);font-weight:600">Recent Transactions</h2>' +
-  txTable(a);
+  // Tax documents live in this tab only — one entry point, no top-bar button.
+  '<div class="tabs">' +
+    '<button class="tab' + (state.bottomTab === 'transactions' ? ' on' : '') + '" data-act="tab" data-arg="transactions">Transactions</button>' +
+    '<button class="tab' + (state.bottomTab === 'tax' ? ' on' : '') + '" data-act="tab" data-arg="tax">Tax documents</button>' +
+  '</div>' +
+  '<div style="margin-top:24px">' + (state.bottomTab === 'tax' ? taxPanel(a) : txTable(a)) + '</div>';
 }
 
 function interestBars(months, max, cur) {
@@ -1715,26 +1717,27 @@ function protectionModal() {
   });
 }
 
-function taxDocsModal() {
-  const a = byId(state.detailId);
-  if (!a) return '';
+// T5s per completed tax year. Same row design the statements modal uses.
+function taxPanel(a) {
   const years = taxYears(a);
-  const body = years.length
-    ? years.map(y =>
-        '<div class="doc-row"><span class="doc-ic">' + icon('File02', 18) + '</span>' +
-          '<span style="min-width:0"><span class="t">T5 — ' + y.year + '</span>' +
-          '<span class="s">Statement of investment income · ' + esc(a.cur) + ' · ' + esc(fmt(y.total, a.cur)) + ' interest</span></span>' +
-          '<button class="btn btn-tertiary btn-sm" data-act="soon" data-arg="Download">' + icon('Download01', 16) + 'Download</button>' +
-        '</div>').join('') +
-      '<p style="margin-top:14px;font-size:var(--text-xs);color:var(--color-text-quaternary);line-height:1.5">' +
-        'One T5 is issued per currency for each tax year in which the account earned interest.</p>'
-    : '<div style="display:flex;flex-direction:column;align-items:center;gap:12px;padding:24px 8px 12px;text-align:center">' +
-        '<span class="empty-sq">' + icon('SearchMd', 20) + '</span>' +
-        '<div style="font-size:var(--text-md);font-weight:600">No tax documents available</div>' +
-        '<div class="empty-desc" style="font-size:var(--text-sm)">A T5 slip appears here after the first tax year in ' +
-        'which this account earns interest.</div>' +
-      '</div>';
-  return panelModal({ title: 'Tax Documents', width: 512, body: body });
+  if (!years.length) {
+    return '<div class="table-wrap"><div style="display:flex;flex-direction:column;align-items:center;gap:12px;' +
+      'padding:56px 24px;text-align:center">' +
+      '<span class="empty-sq">' + icon('SearchMd', 20) + '</span>' +
+      '<div class="empty-title">No tax documents available</div>' +
+      '<div class="empty-desc">A T5 slip appears here after the first tax year in which this account earns interest.</div>' +
+      '</div></div>';
+  }
+  return '<div class="table-wrap"><div style="padding:6px 24px 18px">' +
+    years.map(y =>
+      '<div class="doc-row"><span class="doc-ic">' + icon('File02', 18) + '</span>' +
+        '<span style="min-width:0"><span class="t">T5 — ' + y.year + '</span>' +
+        '<span class="s">Statement of investment income · ' + esc(a.cur) + ' · ' + esc(fmt(y.total, a.cur)) + ' interest</span></span>' +
+        '<button class="btn btn-tertiary btn-sm" data-act="soon" data-arg="Download">' + icon('Download01', 16) + 'Download</button>' +
+      '</div>').join('') +
+    '<p style="margin-top:14px;font-size:var(--text-xs);color:var(--color-text-quaternary);line-height:1.5">' +
+      'One T5 is issued per currency for each tax year in which the account earned interest.</p>' +
+  '</div></div>';
 }
 
 function renderOverlays() {
@@ -1750,7 +1753,6 @@ function renderOverlays() {
   else if (m === 'linked') html += linkedModal();
   else if (m === 'nickname') html += nicknameModal();
   else if (m === 'protection') html += protectionModal();
-  else if (m === 'taxdocs') html += taxDocsModal();
   else if (m === 'addfunds' || m === 'withdraw') html += transferModal(m);
   if (state.toast) {
     html += '<div class="toast" role="status"><span class="tick">' + icon('Check', 12, { sw: 3 }) + '</span>' + esc(state.toast) + '</div>';
@@ -1818,7 +1820,7 @@ function openDetail(id) {
   if (!a) return;
   set({
     view: 'detail', detailId: id, modal: null, menu: null, form: {},
-    chartTab: 'balance', detailRange: '30d', interestRange: '6m'
+    chartTab: 'balance', detailRange: '30d', interestRange: '6m', bottomTab: 'transactions'
   });
   window.scrollTo(0, 0);
 }
@@ -1921,6 +1923,7 @@ const ACTIONS = {
   'detail-range': r => set({ detailRange: r }),
   'chart-tab': t => set({ chartTab: t }),
   'interest-range': r => set({ interestRange: r }),
+  tab: t => set({ bottomTab: t }),
   picker: name => { state.form.open = state.form.open === name ? null : name; render(); },
   pick: arg => {
     const i = arg.indexOf(':');
@@ -1983,7 +1986,6 @@ const ACTIONS = {
     link.remove();
     toast('Proof of account details downloaded.');
   },
-  taxdocs: () => set({ modal: 'taxdocs' }),
   theme: t => { state.theme = t; localStorage.setItem('loop-proto-theme', t); set({ menu: null }); },
   flag: v => set({ flagCreate: v === 'on', menu: null }),
   'proto-toggle': () => set({ protoOpen: !state.protoOpen }),
