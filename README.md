@@ -98,10 +98,12 @@ External Account*), and reset.
    so the populated design is visible immediately, and leaves **CAD** open so the
    creation flow can be run end-to-end. Only savings rows navigate; operating-account
    detail pages are out of scope.
-6. **The Add Account tiles are neutral**, not the tinted green/blue/lilac they started
-   as: `#F8FAFC` at rest, `#D3DAE4` on row hover with the icon stroke darkening too.
-   Those two hexes are slate, not on Loop's neutral (pure grey) ramp, so they're literal
-   values here; dark mode maps them to `bg-tertiary` / `bg-quaternary` instead.
+6. **Neutral surfaces use `#F8FAFC` → `#D3DAE4` on hover**: the Add Account menu tiles
+   (icon stroke darkens with them) and the detail page's secondary action pills. Add Funds
+   is the one solid action, `#045B3F` with white text. Those hexes are slate, not on Loop's
+   neutral (pure grey) ramp, so they sit in the CSS as literal values; dark mode maps the
+   pair to `bg-tertiary` / `bg-quaternary`. Measured contrast: 17.1:1 rest and 12.7:1
+   hover in light, 14.5:1 / 9.9:1 in dark, 8.2:1 for white on the green — all past AA.
 7. **`--color-fg-quaternary` in dark mode** is `neutral-500` here, not `theme.css`'s
    `--loop-bright-purple` — purple icon chrome reads as an accent/bug in review. Single
    deliberate token deviation.

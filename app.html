@@ -294,6 +294,19 @@ main{display:flex;flex-direction:column;width:100%;padding:0 32px 48px;}
   box-shadow:var(--shadow-xs-skeuomorphic);
 }
 .btn-secondary:hover:not(:disabled){background:var(--color-button-secondary-bg_hover);}
+/* account-detail action row: one solid brand action, the rest neutral */
+.btn-brand{background:var(--loop-green);color:var(--white);box-shadow:var(--shadow-xs);}
+.btn-brand:hover:not(:disabled){background:var(--color-brand-600);}
+.btn-neutral{
+  background:#f8fafc;color:var(--color-text-primary);
+  box-shadow:inset 0 0 0 1px #d3dae4,var(--shadow-xs);
+}
+.btn-neutral:hover:not(:disabled){background:#d3dae4;}
+.dark .btn-neutral{
+  background:var(--color-bg-tertiary);color:var(--color-text-primary);
+  box-shadow:inset 0 0 0 1px var(--color-border-primary),var(--shadow-xs);
+}
+.dark .btn-neutral:hover:not(:disabled){background:var(--color-bg-quaternary);}
 .btn-filter{
   background:var(--color-button-filter-bg);color:var(--color-button-filter-text);
   box-shadow:var(--shadow-xs-skeuomorphic);padding:8px 16px;
@@ -1211,11 +1224,11 @@ function detailView() {
     '<div><strong>We’re setting up your account.</strong> Deposits and withdrawals unlock once provisioning finishes — usually a few minutes.</div></div>' : '') +
 
   '<div class="actions">' +
-    '<button class="btn btn-secondary"' + (pending ? ' disabled' : ' data-act="addfunds"') + '>' + icon('BankNote01', 20) + 'Add Funds</button>' +
-    '<button class="btn btn-secondary"' + (pending ? ' disabled' : ' data-act="withdraw"') + '>' + icon('ArrowCircleBrokenUpRight', 20) + 'Withdraw</button>' +
-    '<button class="btn btn-secondary" data-act="soon" data-arg="Convert">' + icon('CoinsSwap01', 20) + 'Convert</button>' +
-    '<button class="btn btn-secondary" data-act="soon" data-arg="Statements">' + icon('File02', 20) + 'View Statements</button>' +
-    '<button class="btn btn-secondary" data-act="taxdocs">' + icon('FileCheck02', 20) + 'View Tax Documents</button>' +
+    '<button class="btn btn-brand"' + (pending ? ' disabled' : ' data-act="addfunds"') + '>' + icon('BankNote01', 20) + 'Add Funds</button>' +
+    '<button class="btn btn-neutral"' + (pending ? ' disabled' : ' data-act="withdraw"') + '>' + icon('ArrowCircleBrokenUpRight', 20) + 'Withdraw</button>' +
+    '<button class="btn btn-neutral" data-act="soon" data-arg="Convert">' + icon('CoinsSwap01', 20) + 'Convert</button>' +
+    '<button class="btn btn-neutral" data-act="soon" data-arg="Statements">' + icon('File02', 20) + 'View Statements</button>' +
+    '<button class="btn btn-neutral" data-act="taxdocs">' + icon('FileCheck02', 20) + 'View Tax Documents</button>' +
   '</div>' +
 
   '<div class="detail-grid">' +
