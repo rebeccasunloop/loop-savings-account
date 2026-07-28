@@ -98,10 +98,14 @@ External Account*), and reset.
    so the populated design is visible immediately, and leaves **CAD** open so the
    creation flow can be run end-to-end. Only savings rows navigate; operating-account
    detail pages are out of scope.
-6. **`--color-fg-quaternary` in dark mode** is `neutral-500` here, not `theme.css`'s
+6. **The Add Account tiles are neutral**, not the tinted green/blue/lilac they started
+   as: `#F8FAFC` at rest, `#D3DAE4` on row hover with the icon stroke darkening too.
+   Those two hexes are slate, not on Loop's neutral (pure grey) ramp, so they're literal
+   values here; dark mode maps them to `bg-tertiary` / `bg-quaternary` instead.
+7. **`--color-fg-quaternary` in dark mode** is `neutral-500` here, not `theme.css`'s
    `--loop-bright-purple` — purple icon chrome reads as an accent/bug in review. Single
    deliberate token deviation.
-7. Interest rate (3.25% APY), FX rates and T5 issue dates are **placeholders** for
+8. Interest rate (3.25% APY), FX rates and T5 issue dates are **placeholders** for
    layout only. The protection modal uses production's CDIC + RPAA copy verbatim, which
    is CAD-specific ("Loop CAD Account Balances are held at Bank of Montreal®"). Non-CAD
    accounts get the same sentence with no institution named, since the real partner per

@@ -396,8 +396,15 @@ tbody tr.clickable:hover{background:var(--color-bg-primary_hover);}
 .menu-rich{align-items:flex-start;gap:12px;}
 .menu-rich .ic{
   width:36px;height:36px;border-radius:var(--radius-xs);display:flex;align-items:center;justify-content:center;flex-shrink:0;
+  /* neutral tiles, per spec; hover darkens the fill and the stroke together */
+  background:#f8fafc;color:var(--color-text-tertiary);
+  transition:background-color .1s linear,color .1s linear;
 }
-.menu-rich .ic svg{width:20px;height:20px;stroke-width:2;}
+.menu-item:not([aria-disabled="true"]):hover .ic{background:#d3dae4;color:var(--color-text-primary);}
+.dark .menu-rich .ic{background:var(--color-bg-tertiary);color:var(--color-text-tertiary);}
+.dark .menu-item:not([aria-disabled="true"]):hover .ic{background:var(--color-bg-quaternary);color:var(--color-text-primary);}
+/* inherit, or `.menu-item svg`'s own color would pin the stroke */
+.menu-rich .ic svg{width:20px;height:20px;stroke-width:2;color:inherit;}
 .menu-rich .t{font-size:var(--text-sm);font-weight:600;color:var(--color-text-primary);display:block;}
 .menu-rich .d{font-size:var(--text-xs);line-height:var(--text-xs-lh);color:var(--color-text-quaternary);display:block;margin-top:2px;white-space:normal;}
 .backdrop{position:fixed;inset:0;z-index:55;}
@@ -1359,15 +1366,15 @@ function addMenu() {
   const savingsCad = savingsFor('CAD'), savingsUsd = savingsFor('USD');
   const savingsFull = savingsCad && savingsUsd;
   return '<div class="menu" style="top:calc(100% + 8px);right:0;width:320px" role="menu">' +
-    menuRich('operating-modal', 'Bank', 'var(--loop-light-green)', 'var(--color-brand-600)', 'Operating account', 'CAD or USD account for day-to-day operations') +
-    menuRich('savings-modal', 'PiggyBank01', 'var(--loop-light-blue)', '#2f6f95', 'Savings account', savingsFull ? 'One per currency — you have both' : 'Earn interest on idle CAD or USD balances', savingsFull) +
+    menuRich('operating-modal', 'Bank', 'Operating account', 'CAD or USD account for day-to-day operations') +
+    menuRich('savings-modal', 'PiggyBank01', 'Savings account', savingsFull ? 'One per currency — you have both' : 'Earn interest on idle CAD or USD balances', savingsFull) +
     '<div class="menu-sep"></div>' +
-    menuRich('linked-modal', 'Link03', 'var(--loop-light-lilac)', 'var(--loop-dark-lilac)', 'Link external account', 'Connect an account at another bank') +
+    menuRich('linked-modal', 'Link03', 'Link external account', 'Connect an account at another bank') +
   '</div>';
 }
-function menuRich(act, ic, bg, fg, title, desc, disabled) {
+function menuRich(act, ic, title, desc, disabled) {
   return '<button class="menu-item menu-rich"' + (disabled ? ' aria-disabled="true"' : ' data-act="' + act + '"') + ' role="menuitem">' +
-    '<span class="ic" style="background:' + bg + ';color:' + fg + '">' + icon(ic, 20) + '</span>' +
+    '<span class="ic">' + icon(ic, 20) + '</span>' +
     '<span style="min-width:0"><span class="t">' + esc(title) + '</span><span class="d">' + esc(desc) + '</span></span>' +
   '</button>';
 }
