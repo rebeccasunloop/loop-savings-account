@@ -612,6 +612,11 @@ select.control{cursor:pointer;appearance:none;background-image:none;padding-righ
 }
 .dark .tooltip-pop{background:var(--color-neutral-800);}
 .info-wrap:hover .tooltip-pop,.info-wrap:focus-within .tooltip-pop{opacity:1;}
+.icon-btn{
+  display:inline-flex;align-items:center;justify-content:center;width:32px;height:32px;margin:-4px;
+  border-radius:var(--radius-xs);cursor:pointer;color:var(--color-fg-primary);transition:background-color .1s linear;
+}
+.icon-btn:hover{background:var(--color-bg-secondary_hover);}
 .info-btn{display:inline-flex;color:var(--color-fg-quaternary);cursor:help;}
 .info-btn:hover{color:var(--color-text-tertiary);}
 .info-btn svg{width:16px;height:16px;}
@@ -1218,18 +1223,21 @@ function detailView() {
       '<div class="card-tabs">' +
         '<button class="tab' + (isBalance ? ' on' : '') + '" data-act="chart-tab" data-arg="balance">Balance</button>' +
         '<button class="tab' + (isBalance ? '' : ' on') + '" data-act="chart-tab" data-arg="interest">Interest Earned</button>' +
-        '<span class="range">' +
+      '</div>' +
+
+      // headline always describes the selected view; period lives on this row,
+      // below the divider, right-aligned as production has it
+      '<div style="display:flex;align-items:center;gap:12px;margin-top:16px">' +
+        '<div style="display:flex;align-items:center;gap:6px;font-size:var(--text-sm);color:var(--color-text-tertiary)">' +
+          (isBalance
+            ? '<span>Available</span>' + infoBtn('avail', 'Funds you can move right now. Savings balances are separate from your operating account balance.')
+            : '<span>Interest earned</span>' + infoBtn('earned', 'Interest paid into this account over the selected period. It accrues daily and is paid on the 1st of each month.')) +
+        '</div>' +
+        '<span style="margin-left:auto">' +
           (isBalance
             ? (ranges.length ? segControl(ranges.map(r => [r[0], r[1]]), state.detailRange, 'detail-range') : '')
             : segControl(iRanges, state.interestRange, 'interest-range')) +
         '</span>' +
-      '</div>' +
-
-      // headline always describes the selected view
-      '<div style="display:flex;align-items:center;gap:6px;margin-top:16px;font-size:var(--text-sm);color:var(--color-text-tertiary)">' +
-        (isBalance
-          ? '<span>Available</span>' + infoBtn('avail', 'Funds you can move right now. Savings balances are separate from your operating account balance.')
-          : '<span>Interest earned</span>' + infoBtn('earned', 'Interest paid into this account over the selected period. It accrues daily and is paid on the 1st of each month.')) +
       '</div>' +
       '<div style="display:flex;align-items:flex-end;gap:8px;margin-top:2px">' +
         '<img class="flag" style="width:24px;height:24px;margin-bottom:6px" src="' + flagOf(cur) + '" alt="">' +
@@ -1274,8 +1282,12 @@ function detailView() {
       '</div>' +
       '<p style="margin-top:20px;font-size:var(--text-sm);line-height:1.55;color:var(--color-text-tertiary)">' +
         'Interest accrues daily on your savings balance and is paid into this account on the 1st of each month.</p>' +
-      '<div style="margin-top:auto;padding-top:20px;border-top:1px solid var(--color-border-tertiary);display:flex;align-items:center;gap:8px">' +
-        '<button class="btn btn-ghost btn-sm" data-act="protection" style="margin-left:-8px">' + icon('ShieldTick', 20) + 'How your money is protected</button>' +
+      // footer icons, as production: protection left, document download right
+      '<div style="margin-top:auto;padding-top:18px;border-top:1px solid var(--color-border-tertiary);display:flex;align-items:center">' +
+        '<button class="icon-btn" data-act="protection" title="How your money is protected"' +
+          ' aria-label="How your money is protected">' + icon('ShieldTick', 20) + '</button>' +
+        '<button class="icon-btn" style="margin-left:auto" data-act="proof" title="Download proof of account details"' +
+          ' aria-label="Download proof of account details">' + icon('Download01', 20) + '</button>' +
       '</div>' +
     '</section>' +
   '</div>' +
@@ -1954,6 +1966,20 @@ const ACTIONS = {
   withdraw: () => set({ modal: 'withdraw', form: {} }),
   'submit-transfer': kind => submitTransfer(kind),
   protection: () => set({ modal: 'protection' }),
+  // instant download — the PDF is inlined, so no network and no modal
+  proof: () => {
+    const acct = byId(state.detailId) || {};
+    const cur = ASSETS.proofs[acct.cur] ? acct.cur : 'CAD';
+    const src = ASSETS.proofs[cur];
+    if (!src) return toast('No sample document is bundled for this account.');
+    const link = document.createElement('a');
+    link.href = src;
+    link.download = 'proof-of-account-details-' + cur + '.pdf';
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    toast('Proof of account details downloaded.');
+  },
   taxdocs: () => set({ modal: 'taxdocs' }),
   theme: t => { state.theme = t; localStorage.setItem('loop-proto-theme', t); set({ menu: null }); },
   flag: v => set({ flagCreate: v === 'on', menu: null }),

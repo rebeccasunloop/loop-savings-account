@@ -59,12 +59,21 @@ with the account id and **View account details**. Domain errors are mapped from
 
 **Savings detail** — Add Funds / Withdraw / Convert / View Statements / Tax Documents
 (no Send Payment, no e-Transfer — savings is Loop-to-Loop only). The chart card has one
-control row: Balance ⇄ Interest Earned as underline tabs, period as pills. The headline
+header: Balance ⇄ Interest Earned as underline tabs, with the period pills below the
+divider on the label row, right-aligned as production has them. The headline
 follows the selected view — Available balance, or interest earned over the period — so
 the number and its label always agree. Side panel carries interest earned last month,
-lifetime interest, APY and next payout; a protection dialog (production's CDIC + RPAA
-copy, currency-aware); a **Tax Documents** modal listing T5s with an empty state; then
-Recent Transactions. Empty states throughout for a freshly created account.
+lifetime interest, APY and next payout, and a footer of two icons as production has it —
+protection dialog (production's CDIC + RPAA copy, currency-aware) on the left, and an
+instant **proof of account details** PDF download on the right. A **Tax Documents** modal
+lists T5s with an empty state, then Recent Transactions. Empty states throughout for a
+freshly created account.
+
+The proof-of-account-details PDFs are inlined at build time from
+`~/Downloads/proof-of-account-details-download-<CUR>.pdf` — currently CAD and EUR. A
+currency with no document falls back to the CAD file, and the download is named for the
+document you actually get, so a USD account downloads `…-CAD.pdf`. Drop in a USD file and
+rebuild to fix that.
 
 **Also wired** — operating-account creation with plan usage + limit-reached upgrade
 state, link external account, edit nickname, Add Funds / Withdraw between Loop accounts
