@@ -63,18 +63,10 @@ header: Balance ⇄ Interest Earned as underline tabs, with the period pills bel
 divider on the label row, right-aligned as production has them. The headline
 follows the selected view — Available balance, or interest earned over the period — so
 the number and its label always agree. Side panel carries interest earned last month,
-lifetime interest, APY and next payout, and a footer of two icons as production has it —
-protection dialog (production's CDIC + RPAA copy, currency-aware) on the left, and an
-instant **proof of account details** PDF download on the right. Below that, Transactions
-and **Tax documents** tabs — the tax tab lists T5s per completed tax year with a download
-per slip, and an empty state until the first year closes. Empty states throughout for a
-freshly created account.
-
-The proof-of-account-details PDFs are inlined at build time from
-`~/Downloads/proof-of-account-details-download-<CUR>.pdf` — currently CAD and EUR. A
-currency with no document falls back to the CAD file, and the download is named for the
-document you actually get, so a USD account downloads `…-CAD.pdf`. Drop in a USD file and
-rebuild to fix that.
+lifetime interest, APY and next payout, and a footer button opening the protection dialog
+(production's CDIC + RPAA copy, currency-aware). A **Tax Documents** modal lists T5s per
+completed tax year with a download per slip, and an empty state until the first year
+closes. Then Recent Transactions. Empty states throughout for a freshly created account.
 
 **Also wired** — operating-account creation with plan usage + limit-reached upgrade
 state, link external account, edit nickname, Add Funds / Withdraw between Loop accounts
@@ -96,9 +88,9 @@ External Account*), and reset.
 2. **"Add Account" replaces "Link External Account"**, per the account-page notes —
    which conflicts with the PR's "next to Link External Account". Both are in here: the
    PostHog flag toggles between them.
-3. **Tax documents has one entry point**: the tab below the chart, per the meeting notes.
-   It briefly had both a tab and a *View Tax Documents* action opening a modal; the button
-   is gone and the tab keeps the modal's leaner row-per-slip design.
+3. **Tax documents has one entry point**: the *View Tax Documents* action, which opens a
+   modal. The meeting notes asked for a tab, but a T5 is issued once a year — too little
+   content to hold a tab. Row per slip, in the shape production uses for statements.
 4. **Two-line account rows** (display name + descriptor) from the demo, rather than
    production's single line — with nicknames surfaced, the second line is what tells
    you which underlying account you're looking at. Worth confirming.
