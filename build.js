@@ -52,7 +52,7 @@ const ICON_NAMES = [
   'Sun', 'Moon01', 'Monitor01', 'LogOut01', 'Sliders02', 'RefreshCcw01', 'SearchMd',
   // accounts
   'BankNote01', 'CoinsSwap01', 'ArrowCircleBrokenUpRight', 'File02', 'FileCheck02',
-  'Download01', 'ShieldTick', 'PiggyBank01', 'ArrowUpRight', 'ArrowDownLeft',
+  'Download01', 'ShieldTick', 'PiggyBank01',
   'LineChartUp01', 'Percent03', 'CalendarCheck01', 'Coins03', 'MessageChatCircle',
   'ArrowNarrowRight', 'TrendDown01',
 ];

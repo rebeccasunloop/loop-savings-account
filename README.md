@@ -87,7 +87,8 @@ with the account id and **View account details**. Domain errors are mapped from
 `account_holder_not_provisioned`, `account_holder_not_found`.
 
 **Savings detail** — Add Funds / Withdraw / Convert / View Statements / Tax Documents
-(no Send Payment, no e-Transfer — savings is Loop-to-Loop only). The chart card has one
+(no Send Payment, no e-Transfer — savings is Loop-to-Loop only). No Pending In /
+Processing Out either: with no external rails, both are structurally always zero. The chart card has one
 header: Balance ⇄ Interest Earned as underline tabs, with the period pills below the
 divider on the label row, right-aligned as production has them. The headline
 follows the selected view — Available balance, or interest earned over the period — so
